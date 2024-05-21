@@ -37,3 +37,6 @@ If successfuly, you would receive the message from mail or wechat offical accout
 
 ## Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=1JunGu/Tracking_manuscript_status&type=Date)](https://star-history.com/#1JunGu/Tracking_manuscript_status&Date)
+
+## References
+1. [python开发微信公众号发送消息](https://zhuanlan.zhihu.com/p/665967722)
