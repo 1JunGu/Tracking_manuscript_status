@@ -29,7 +29,9 @@ This repository is aimed to create an agent to monitor the status of manuscript 
 
 ## Results
 If successfuly, you would receive the message from mail or wechat offical accout like this
-![Offici accout](img/official_account.png)
+![Offici accout](img/official_account.jpg)
+>[!CAUTION]
+>According the user policy of Wechat Offical Account. The max message sent to users is limited to 5 everyday, to overcome this limit, you should better send message to offical account after receiving 4 messages or less.
 
 
 

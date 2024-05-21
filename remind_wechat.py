@@ -1,10 +1,11 @@
+import os
+import time
+
 import pickle
 from threading import Thread
-import time
 import requests
 from io import BytesIO
 from PIL import Image
-import os
 
 requests.packages.urllib3.disable_warnings()
 
@@ -30,18 +31,19 @@ def islogin(session):
         pass
     loginurl = session.get("https://mp.weixin.qq.com/cgi-bin/scanloginqrcode?action=ask&token=&lang=zh_CN&f=json&ajax=1").json()
     if loginurl['base_resp']['ret'] == 0:
-        print('Cookies valid, No login again!')
+        print('Cookies is valid, no need to scan the code to log in!')
         # print("loginurl:", loginurl)
         return session, True
     else:
-        print('Cookies invalid, please scan the code!')
+        print('Cookies value has expired, please scan the code to log in again!')
         return session, False
 
-# acquire contacts and send messages to openId
+# acquires contacts and sends messages to openId
 def getOpenIdAndSendMsg(session, openId, msg):
-    # acquire token
+    # Acquire user
     token = session.cookies.get("token")
-    contact_url = session.get("https://mp.weixin.qq.com/cgi-bin/user_tag?action=get_all_data&lang=zh_CN&token=%s" % token)
+    contact_url = session.get(
+        "https://mp.weixin.qq.com/cgi-bin/user_tag?action=get_all_data&lang=zh_CN&token=%s" % token)
     # print("contact_url:", contact_url.text)
 
     # https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response&f=json
@@ -54,7 +56,7 @@ def getOpenIdAndSendMsg(session, openId, msg):
         "imgcode": '',
         "content": msg,
         "token": token,
-        "lang": "en_US",
+        "lang": "zh_CN", # Chinese
         "f": "json",
         "ajax": 1
     }
@@ -64,8 +66,8 @@ def getOpenIdAndSendMsg(session, openId, msg):
                             headers=headers).json()
     print("res_send", res_send)
 
-# login offical account
-def official_login():
+# Scan the code to log in to the public account
+def gzhlogin():
 
     session = requests.session()
     session.get('https://mp.weixin.qq.com/', headers=headers)
@@ -77,19 +79,19 @@ def official_login():
     while 1:
         date = session.get(dateurl).json()
         if date['status'] == 0:
-            print('code invalid, please scan the code!')
+            print('Code has not expired, please scan the code!')
         elif date['status'] == 6:
-            print('please confirm!')
+            print('Scanned, please confirm!')
         if date['status'] == 1:
-            print('confirm success, login success!')
+            print('confirm, login successfully!')
             url = session.post('https://mp.weixin.qq.com/cgi-bin/bizlogin?action=login', data='userlang=zh_CN&redirect_url=&cookie_forbidden=0&cookie_cleaned=1&plugin_used=0&login_type=3&token=&lang=zh_CN&f=json&ajax=1', headers=headers).json()
             print("url:", url)
-            # Acquire the token and save it to cookies
+            # Acquire token and save to cookies
             redirect_url = url["redirect_url"]
 
             token = redirect_url[redirect_url.rfind("=") + 1:len(redirect_url)]
             requests.utils.add_dict_to_cookiejar(session.cookies, {"token": token})
-            # acquire contacts
+            # Acquire user
             contact_url = session.get("https://mp.weixin.qq.com/cgi-bin/user_tag?action=get_all_data&lang=zh_CN&token=%s" % token)
             # print("contact_url:", contact_url.text)
             break
@@ -99,24 +101,19 @@ def official_login():
     return session
 
 def checkSession():
-    # write cookie
+    # Write Cookies
     session = requests.session()
     if not os.path.exists('gzhcookies.cookie'):
         with open('gzhcookies.cookie', 'wb') as f:
             pickle.dump(session.cookies, f)
-    # read cookie
+    # Read Cookies
     session.cookies = pickle.load(open('gzhcookies.cookie', 'rb'))
     session, status = islogin(session)
     if not status:
-        session = official_login()
+        session = gzhlogin()
 
     return session
-
-if __name__ == '__main__':
-
-    # Send messages to the specified openId, maximum length of each message is 598
-    openId = "oIAZG6FN5E74DJ6kvxO8J2fe04Oo" # replace with your openId
-    msgIn = "Test again from Ubuntu"
+def sendMsg(openId, msgIn):
     resTxtList = [msgIn]
     split_length = 598
     start_txt = 0
@@ -124,3 +121,10 @@ if __name__ == '__main__':
     session = checkSession()
     for msg in resTxtList:
         getOpenIdAndSendMsg(session, openId, msg)
+
+if __name__ == '__main__':
+
+    # Send messages, maximum length 600 characters
+    openId = "oIAZG6FN5E74DJ6kvxO8J2fe04Oo"
+    msgIn = "From Ubuntu WSL2 test3"
+    sendMsg(openId, msgIn)
