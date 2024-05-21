@@ -24,19 +24,6 @@ class showpng(Thread):
         img = Image.open(BytesIO(self.data))
         img.show()
 
-def islogin(session):
-    try:
-        session.cookies.load(ignore_discard=True)
-    except Exception:
-        pass
-    loginurl = session.get("https://mp.weixin.qq.com/cgi-bin/scanloginqrcode?action=ask&token=&lang=zh_CN&f=json&ajax=1").json()
-    if loginurl['base_resp']['ret'] == 0:
-        print('Cookies is valid, no need to scan the code to log in!')
-        # print("loginurl:", loginurl)
-        return session, True
-    else:
-        print('Cookies value has expired, please scan the code to log in again!')
-        return session, False
 
 # acquires contacts and sends messages to openId
 def getOpenIdAndSendMsg(session, openId, msg):
@@ -64,7 +51,7 @@ def getOpenIdAndSendMsg(session, openId, msg):
     res_send = session.post(send_url,
                             data=dataJson,
                             headers=headers).json()
-    print("res_send", res_send)
+    #print("res_send", res_send)
 
 # Scan the code to log in to the public account
 def gzhlogin():
@@ -100,6 +87,20 @@ def gzhlogin():
         pickle.dump(session.cookies, f)
     return session
 
+def islogin(session):
+    try:
+        session.cookies.load(ignore_discard=True)
+    except Exception:
+        pass
+
+    loginurl = session.get("https://mp.weixin.qq.com/cgi-bin/scanloginqrcode?action=ask&token=&lang=zh_CN&f=json&ajax=1").json()
+    if loginurl['base_resp']['ret'] == 0:
+        #print('Cookies is valid, no need to scan the code to log in!')
+        return session, True
+    else:
+        print('Cookies value has expired, please scan the code to log in again!')
+        return session, False
+
 def checkSession():
     # Write Cookies
     session = requests.session()
@@ -113,9 +114,10 @@ def checkSession():
         session = gzhlogin()
 
     return session
+
 def sendMsg(openId, msgIn):
     resTxtList = [msgIn]
-    split_length = 598
+    split_length = 598 # Maximum length of each message
     start_txt = 0
     end_txt = split_length
     session = checkSession()
@@ -123,8 +125,7 @@ def sendMsg(openId, msgIn):
         getOpenIdAndSendMsg(session, openId, msg)
 
 if __name__ == '__main__':
-
     # Send messages, maximum length 600 characters
-    openId = "oIAZG6FN5E74DJ6kvxO8J2fe04Oo"
-    msgIn = "From Ubuntu WSL2 test3"
+    openId = "xxxxxxxxxxxxxxxxxxxxxxxxxxxx" # Your openId
+    msgIn = "----------------------" # Your message
     sendMsg(openId, msgIn)
