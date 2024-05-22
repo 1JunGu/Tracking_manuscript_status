@@ -36,7 +36,7 @@ previous_stage_info = "None"
 method = "email" # or wechat
 while True:
     try:
-        status_message, status_table = tm_nc.check_status(driver,"email",previous_stage_info)
+        status_message, status_table = tm_nc.check_status(driver,"email")
         if method == "wechat":  
             wechat.sendMsg(openId,status_message)
         elif method == "email":
