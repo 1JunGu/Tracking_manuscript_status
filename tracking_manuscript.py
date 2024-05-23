@@ -168,14 +168,14 @@ class TrackingManuscript:
 
         return driver
 
-    def check_status(self,driver,method):
+    def check_status(self,driver,method,previous_stage_info):
         driver.refresh()
         self.logger.debug("Refreshed the page") #the time interval should be less than 30 minutes
         self.handle_popup(driver, timeout=5)
         # Extract the "Current Stage" information
         current_stage_info = self.extract_current_stage(driver,text_stage="Current Stage")
 
-        if current_stage_info  != self.previous_stage_info:
+        if current_stage_info  != previous_stage_info:
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             message = f"Current Stage: {current_stage_info}, Now : {current_time}"
             self.logger.status(message)
@@ -183,5 +183,4 @@ class TrackingManuscript:
                 return message
             elif method == "email":
                 stage_table = self.extract_stage_table(driver)
-                return message, stage_table
-            self.previous_stage_info = current_stage_info
+                return message, stage_table, current_stage_info
