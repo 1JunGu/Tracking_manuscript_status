@@ -9,6 +9,7 @@ import tracking_manuscript as tm
 journal = "**" #self defined
 login_url = "https://mts-ncomms.nature.com/cgi-bin/main.plex" # taks NC as an example
 
+#some debug
 #user information
 username = "xxxxxxxx"
 password = "xxxxxxxxxxxx"
